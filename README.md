@@ -17,19 +17,9 @@ It provides:
 Build a reliable, visually distinctive desk clock that combines practical data (time/date/environment) with a satellite-inspired LED identity.
 
 ## Design Story
-This project was designed as a desk clock shaped like a small satellite.
-The PCB is custom-made and milled on a CNC 3018, blending DIY hardware with practical daily use.
-Two bottom NeoPixels simulate engine glow, while a single top LED acts as a satellite beacon.
-
-### Alternative A (Technical)
 Desk Satellite Clock is an ESP32-based desktop device built on a custom CNC 3018 milled PCB.
 It combines NTP time/date on a MAX7219-driven vintage 9-digit 7-segment module (last digit intentionally unused),
 DHT11 environmental sensing, and FreeRTOS-separated display/animation tasks.
-
-### Alternative B (Showcase)
-A handmade satellite-inspired desk clock with its own custom PCB, milled on a CNC 3018.
-Twin NeoPixels at the base imitate engine glow, and a top beacon LED blinks like an antenna in orbit,
-while the front display shows live time, date, and room conditions.
 
 ## Features
 - Dual FreeRTOS tasks (display + LED animation)
