@@ -40,7 +40,6 @@ while the front display shows live time, date, and room conditions.
 ## Repository Structure
 - `src/main.cpp` – main application code
 - `include/secrets.h.example` – Wi-Fi credentials template
-- `docs/archive/` – archived experimental notes/copies
 - `lib/` – local third-party libraries
 - `CHANGELOG.md` – release and change history
 
