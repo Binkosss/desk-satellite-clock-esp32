@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.0.2] - 2026-03-14
+### Added
+- Repository structure for hardware documentation:
+  - `docs/photos/` for project photos
+  - `hardware/pcb/fusion360/` for Fusion Electronics source files (`.sch`, `.brd`)
+  - `hardware/pcb/gerbers/` and `hardware/pcb/exports/` for fabrication and documentation outputs
+
+### Changed
+- `README.md` updated with photo directory and Fusion PCB file location details.
+
 ## [1.0.1] - 2026-03-14
 ### Added
 - Global timezone configuration via `TIMEZONE_POSIX` in `include/secrets.h`.

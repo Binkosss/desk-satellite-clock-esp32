@@ -31,6 +31,10 @@ DHT11 environmental sensing, and FreeRTOS-separated display/animation tasks.
 - `src/main.cpp` – main application code
 - `include/secrets.h.example` – Wi-Fi credentials template
 - `lib/` – local third-party libraries
+- `docs/photos/` – project photos (build progress, final device, PCB shots)
+- `hardware/pcb/fusion360/` – Fusion Electronics design sources (`.sch` and `.brd`)
+- `hardware/pcb/gerbers/` – manufacturing output files for PCB fabrication
+- `hardware/pcb/exports/` – PDF/image exports and assembly-related outputs
 - `CHANGELOG.md` – release and change history
 
 ## Quick Start
@@ -75,6 +79,11 @@ pio device monitor -b 115200
 - Single LED on GPIO 18
 - NeoPixel data on GPIO 5
 - MAX7219 display module
+
+## Hardware Design Files
+- PCB design sources are stored in `hardware/pcb/fusion360/`.
+- Fusion Electronics files include schematic (`*.sch`) and board (`*.brd`) files.
+- Project and build photos are stored in `docs/photos/`.
 
 ## Notes
 - Timezone is configured by `TIMEZONE_POSIX` in `include/secrets.h`.
