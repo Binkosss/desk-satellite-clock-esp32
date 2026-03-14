@@ -3,6 +3,8 @@
 A PlatformIO/Arduino project for a custom desk clock shaped like a small satellite.
 The device runs on an ESP32 and a custom PCB milled on a CNC 3018.
 
+![Desk Satellite Clock](docs/photos/clkbybinkosss.jpg)
+
 It provides:
 - Time and date from NTP on MAX7219 display
 - Temperature and humidity from DHT11
@@ -32,7 +34,7 @@ DHT11 environmental sensing, and FreeRTOS-separated display/animation tasks.
 - `include/secrets.h.example` – Wi-Fi credentials template
 - `lib/` – local third-party libraries
 - `docs/photos/` – project photos (build progress, final device, PCB shots)
-- `hardware/pcb/fusion360/` – Fusion Electronics design sources (`.sch` and `.brd`)
+- `hardware/pcb/fusion360/` – Fusion Electronics design sources (`.fsch` and `.fbrd`)
 - `hardware/pcb/gerbers/` – manufacturing output files for PCB fabrication
 - `hardware/pcb/exports/` – PDF/image exports and assembly-related outputs
 - `CHANGELOG.md` – release and change history
@@ -82,7 +84,7 @@ pio device monitor -b 115200
 
 ## Hardware Design Files
 - PCB design sources are stored in `hardware/pcb/fusion360/`.
-- Fusion Electronics files include schematic (`*.sch`) and board (`*.brd`) files.
+- Fusion Electronics files include schematic (`*.fsch`) and board (`*.fbrd`) files.
 - Project and build photos are stored in `docs/photos/`.
 
 ## Notes
