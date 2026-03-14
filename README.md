@@ -11,7 +11,7 @@ It provides:
 - Vintage clock-style 7-segment LED module with lens look (9 digits total, last digit intentionally unused)
 
 ## Author
-- **Binki**
+- **Binkosss**
 
 ## Project Goal
 Build a reliable, visually distinctive desk clock that combines practical data (time/date/environment) with a satellite-inspired LED identity.
