@@ -4,9 +4,10 @@ All notable changes to this project are documented in this file.
 
 ## [1.0.2] - 2026-03-14
 ### Added
-  - `docs/photos/` for project photos
+- Repository structure for hardware documentation:
+	- `docs/photos/` for project photos
 	- `hardware/pcb/fusion360/` for Fusion Electronics source files (`.fsch`, `.fbrd`)
-  - `hardware/pcb/gerbers/` and `hardware/pcb/exports/` for fabrication and documentation outputs
+	- `hardware/pcb/gerbers/` and `hardware/pcb/exports/` for fabrication and documentation outputs
 
 ### Changed
 - `README.md` updated with photo directory and Fusion PCB file location details.
