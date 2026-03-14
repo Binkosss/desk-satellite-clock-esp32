@@ -52,6 +52,10 @@ int pixelBrightness = 30;
 
 unsigned long lastColorUpdateMs = 0;  // Last color update time
 unsigned long colorTransitionDelayMs = 10; // Delay between color steps (ms)
+unsigned long lastNtpSyncMs = 0;
+unsigned long ntpSyncIntervalMs = 1000;
+unsigned long lastWifiReconnectAttemptMs = 0;
+unsigned long wifiReconnectIntervalMs = 10000;
 
 // DHT11 settings
 #define DHTPIN 15
@@ -120,6 +124,9 @@ void setup() {
   strip.begin();
   strip.show();
   pinMode(BUTTON_PIN, INPUT_PULLUP);
+  currentButtonState = digitalRead(BUTTON_PIN);
+  lastButtonState = currentButtonState;
+  displayMode = 0; // Always start with time view after reset/power loss
   pinMode(LED_PIN_SINGLE, OUTPUT);  // Configure single LED pin
   digitalWrite(LED_PIN_SINGLE, LOW); 
   pinMode(LED_BUILTIN, OUTPUT);
@@ -140,6 +147,14 @@ void loop() {
 
 void taskDisplay(void *parameter) {
   for (;;) {
+    if (WiFi.status() != WL_CONNECTED) {
+      unsigned long currentMs = millis();
+      if (currentMs - lastWifiReconnectAttemptMs >= wifiReconnectIntervalMs) {
+        lastWifiReconnectAttemptMs = currentMs;
+        WiFi.reconnect();
+      }
+    }
+
     currentButtonState = digitalRead(BUTTON_PIN);
 
     // Check if button was pressed
@@ -181,7 +196,14 @@ void taskDisplay(void *parameter) {
 }
 
 bool getLocalDateTime(tm &localDateTime) {
-  timeClient.update();
+  unsigned long currentMs = millis();
+  if (currentMs - lastNtpSyncMs >= ntpSyncIntervalMs) {
+    lastNtpSyncMs = currentMs;
+    if (WiFi.status() == WL_CONNECTED) {
+      timeClient.update();
+    }
+  }
+
   time_t epochUtc = (time_t)timeClient.getEpochTime();
   if (epochUtc <= 0) {
     return false;
@@ -202,7 +224,7 @@ void displayTime(int hours, int minutes, int seconds) {
 
 void displayDate(int year, int month, int day) {
   char dateStr[9];
-  snprintf(dateStr, sizeof(dateStr), "%02d-%02d-%02d", year % 100, month, day);
+  snprintf(dateStr, sizeof(dateStr), "%02d-%02d-%02d", day, month, year % 100);
   max7219.Clear();
   for (int i = 0; i < DISPLAY_DIGITS_USED; i++) {
     max7219.DisplayChar(i, dateStr[i], 0);
@@ -273,7 +295,7 @@ void taskLedAnimation(void *parameter) {
     }
 
     smoothColorTransition();  // NeoPixel animation
-    //delay(10);  // Short delay to avoid task blocking
+    vTaskDelay(pdMS_TO_TICKS(1));  // Yield CPU for stable long-run timing
   }
 }
 

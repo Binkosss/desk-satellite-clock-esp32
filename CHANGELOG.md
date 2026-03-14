@@ -6,9 +6,14 @@ All notable changes to this project are documented in this file.
 ### Added
 - Global timezone configuration via `TIMEZONE_POSIX` in `include/secrets.h`.
 - Example timezone settings in `include/secrets.h.example`.
+- Wi-Fi auto-reconnect in display task (retries every 10 s on connection loss).
 
 ### Changed
 - Time handling now uses POSIX timezone rules for automatic standard time / DST switching.
+- Date display format changed from `YY-MM-DD` to `DD-MM-YY`.
+- Device always starts in time display mode after reset or power loss.
+- NTP sync throttled to once per second to reduce overhead.
+- LED animation task now uses `vTaskDelay` to yield CPU and fix long-uptime slowdown.
 - README updated with timezone setup instructions and examples.
 
 ## [1.0.0] - 2026-03-14
