@@ -41,9 +41,16 @@ DHT11 environmental sensing, and FreeRTOS-separated display/animation tasks.
 ```cpp
 #define WIFI_SSID "YOUR_WIFI_SSID"
 #define WIFI_PASSWORD "YOUR_WIFI_PASSWORD"
+#define TIMEZONE_POSIX "CET-1CEST,M3.5.0/2,M10.5.0/3"
 ```
 
 `include/secrets.h` is ignored by Git.
+
+`TIMEZONE_POSIX` enables automatic standard time / daylight saving time switching.
+Examples:
+- Poland: `CET-1CEST,M3.5.0/2,M10.5.0/3`
+- New York: `EST5EDT,M3.2.0/2,M11.1.0/2`
+- UTC (no DST): `UTC0`
 
 ### 2) Build
 ```bash
@@ -70,7 +77,8 @@ pio device monitor -b 115200
 - MAX7219 display module
 
 ## Notes
-- Time offset is currently configured for CET/CEST values in code.
+- Timezone is configured by `TIMEZONE_POSIX` in `include/secrets.h`.
+- The clock uses POSIX timezone rules, so DST/standard time switching is automatic.
 - For public sharing, do not commit `include/secrets.h`.
 
 ## License

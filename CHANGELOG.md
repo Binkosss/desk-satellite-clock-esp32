@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.0.1] - 2026-03-14
+### Added
+- Global timezone configuration via `TIMEZONE_POSIX` in `include/secrets.h`.
+- Example timezone settings in `include/secrets.h.example`.
+
+### Changed
+- Time handling now uses POSIX timezone rules for automatic standard time / DST switching.
+- README updated with timezone setup instructions and examples.
+
 ## [1.0.0] - 2026-03-14
 ### Added
 - Public release documentation: `README.md`, `CONTRIBUTING.md`, `LICENSE`.
@@ -9,12 +18,8 @@ All notable changes to this project are documented in this file.
 - Source header in `src/main.cpp` with author, date, and purpose.
 
 ### Changed
-- Unified comments/messages to concise English.
 - Refactored variable names for readability and consistency.
 - Replaced hardcoded Wi-Fi credentials with `secrets.h`-based local config.
-
-### Project Structure
-- Moved archived experimental files from `src/` to `docs/archive/`.
 
 ## [0.6.0]
 ### Added

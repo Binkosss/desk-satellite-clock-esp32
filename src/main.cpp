@@ -7,8 +7,8 @@
            Hardware uses a custom PCB milled on a CNC 3018.
            Two bottom NeoPixels simulate engine glow, and one top LED
            blinks like a satellite antenna beacon.
-           Display is a vintage lens-style 9-digit 7-segment module;
-           the last digit is intentionally unused.
+           Display is a vintage lens-style 9-digit 7-segment module from old calculator.
+           the last digit is intentionally unused because 8 digits are enough to display time, date, or temperature/humidity.
 */
 
 #include <DHT.h>
@@ -19,6 +19,7 @@
 #include <MAX7219.h>
 #include <TimeLib.h>
 #include <Adafruit_NeoPixel.h>
+#include <time.h>
 
 #if __has_include("secrets.h")
 #include "secrets.h"
@@ -30,6 +31,10 @@
 
 #ifndef WIFI_PASSWORD
 #define WIFI_PASSWORD "YOUR_WIFI_PASSWORD"
+#endif
+
+#ifndef TIMEZONE_POSIX
+#define TIMEZONE_POSIX "UTC0"
 #endif
 
 // NeoPixel settings
@@ -59,10 +64,9 @@ const char* password = WIFI_PASSWORD;
 
 // NTP settings
 const char* timeServer = "pool.ntp.org";
-const long gmtOffsetSec = 3600;
-const int daylightOffsetSec = 3600;
+const char* timezonePosix = TIMEZONE_POSIX;
 WiFiUDP udp;
-NTPClient timeClient(udp, timeServer, gmtOffsetSec, 60000);
+NTPClient timeClient(udp, timeServer, 0, 60000);
 
 MAX7219 max7219;
 
@@ -86,6 +90,7 @@ void displayTime(int hours, int minutes, int seconds);
 void displayDate(int year, int month, int day);
 void displayTemperatureHumidity(float temperature, float humidity);
 void smoothColorTransition(void);
+bool getLocalDateTime(tm &localDateTime);
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -100,9 +105,14 @@ void setup() {
   }
   Serial.println("Wi-Fi connected.");
 
-  // Init NTP
+  // Apply timezone (POSIX TZ format) for automatic standard/DST handling
+  setenv("TZ", timezonePosix, 1);
+  tzset();
+  Serial.print("Timezone set to: ");
+  Serial.println(timezonePosix);
+
+  // Init NTP (UTC source)
   timeClient.begin();
-  timeClient.setTimeOffset(gmtOffsetSec);
 
   // Init MAX7219, DHT, NeoPixel and pins
   max7219.Begin();
@@ -140,20 +150,21 @@ void taskDisplay(void *parameter) {
 
     lastButtonState = currentButtonState;
 
-    timeClient.update();
-
-    // Declare outside switch
-    time_t epochTime = 0;
+    tm localDateTime = {};
+    bool hasLocalTime = getLocalDateTime(localDateTime);
 
     // Show data based on current mode
     switch(displayMode) {
       case 0:  // Show time
-        displayTime(timeClient.getHours(), timeClient.getMinutes(), timeClient.getSeconds());
+        if (hasLocalTime) {
+          displayTime(localDateTime.tm_hour, localDateTime.tm_min, localDateTime.tm_sec);
+        }
         break;
       
       case 1:  // Show date
-        epochTime = timeClient.getEpochTime();
-        displayDate(year(epochTime), month(epochTime), day(epochTime));
+        if (hasLocalTime) {
+          displayDate(localDateTime.tm_year + 1900, localDateTime.tm_mon + 1, localDateTime.tm_mday);
+        }
         break;
 
       case 2:  // Show temperature and humidity
@@ -167,6 +178,17 @@ void taskDisplay(void *parameter) {
 
     delay(10);  // Keep CPU time for other tasks
   }
+}
+
+bool getLocalDateTime(tm &localDateTime) {
+  timeClient.update();
+  time_t epochUtc = (time_t)timeClient.getEpochTime();
+  if (epochUtc <= 0) {
+    return false;
+  }
+
+  localtime_r(&epochUtc, &localDateTime);
+  return true;
 }
 
 void displayTime(int hours, int minutes, int seconds) {
