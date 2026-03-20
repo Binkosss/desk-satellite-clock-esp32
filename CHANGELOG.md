@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.0.3] - 2026-03-20
+### Added
+- Configurable LED activity window in `src/main.cpp` via:
+	- `LED_ACTIVE_HOUR_START`
+	- `LED_ACTIVE_HOUR_END`
+
+### Changed
+- LED outputs are now forced OFF outside active hours.
+- Default schedule keeps LEDs OFF from 21:00 to 06:59 (local time).
+
 ## [1.0.2] - 2026-03-14
 ### Added
 - Repository structure for hardware documentation:

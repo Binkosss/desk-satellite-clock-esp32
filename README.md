@@ -27,6 +27,7 @@ DHT11 environmental sensing, and FreeRTOS-separated display/animation tasks.
 - Dual FreeRTOS tasks (display + LED animation)
 - Button-based mode switching (time/date/temp+humidity)
 - Smooth NeoPixel color transition
+- LED quiet hours (animation disabled from 21:00 to 06:59 by local time)
 - NTP sync over Wi-Fi
 
 ## Repository Structure
@@ -90,6 +91,7 @@ pio device monitor -b 115200
 ## Notes
 - Timezone is configured by `TIMEZONE_POSIX` in `include/secrets.h`.
 - The clock uses POSIX timezone rules, so DST/standard time switching is automatic.
+- LED animation active window is controlled in `src/main.cpp` by `LED_ACTIVE_HOUR_START` and `LED_ACTIVE_HOUR_END`.
 - For public sharing, do not commit `include/secrets.h`.
 
 ## License

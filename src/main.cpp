@@ -42,6 +42,8 @@
 #define LED_COUNT 2
 #define LED_PIN_SINGLE 18 // Single LED pin
 #define DISPLAY_DIGITS_USED 8 // 9-digit module in hardware, last digit intentionally unused
+#define LED_ACTIVE_HOUR_START 7
+#define LED_ACTIVE_HOUR_END 21 // LEDs are off from 21:00 to 06:59
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 
 // LED animation state
@@ -95,6 +97,8 @@ void displayDate(int year, int month, int day);
 void displayTemperatureHumidity(float temperature, float humidity);
 void smoothColorTransition(void);
 bool getLocalDateTime(tm &localDateTime);
+bool shouldRunLedAnimation(const tm &localDateTime);
+void turnOffAllLeds();
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -251,6 +255,16 @@ void taskLedAnimation(void *parameter) {
 
   for (;;) {
     unsigned long currentMillis = millis();
+    tm localDateTime = {};
+    bool hasLocalTime = getLocalDateTime(localDateTime);
+
+    if (hasLocalTime && !shouldRunLedAnimation(localDateTime)) {
+      turnOffAllLeds();
+      blinkStep = 0;
+      previousMillis = currentMillis;
+      vTaskDelay(pdMS_TO_TICKS(100));
+      continue;
+    }
     
     switch (blinkStep) {
       case 0:  // First blink
@@ -331,6 +345,19 @@ void smoothColorTransition() {
       strip.show();
     }
   }
+}
+
+bool shouldRunLedAnimation(const tm &localDateTime) {
+  return localDateTime.tm_hour >= LED_ACTIVE_HOUR_START && localDateTime.tm_hour < LED_ACTIVE_HOUR_END;
+}
+
+void turnOffAllLeds() {
+  for (int i = 0; i < LED_COUNT; i++) {
+    strip.setPixelColor(i, 0, 0, 0);
+  }
+  strip.show();
+  digitalWrite(LED_PIN_SINGLE, LOW);
+  digitalWrite(LED_BUILTIN, LOW);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
