@@ -44,6 +44,14 @@
 #define DISPLAY_DIGITS_USED 8 // 9-digit module in hardware, last digit intentionally unused
 #define LED_ACTIVE_HOUR_START 7
 #define LED_ACTIVE_HOUR_END 21 // LEDs are off from 21:00 to 06:59
+#define LED_BRIGHTNESS_PERCENT 30
+
+const int LED_PWM_FREQ = 5000;
+const int LED_PWM_RESOLUTION_BITS = 8;
+const int LED_PWM_MAX_DUTY = (1 << LED_PWM_RESOLUTION_BITS) - 1;
+const int LED_PWM_CHANNEL_SINGLE = 0;
+const int LED_PWM_CHANNEL_BUILTIN = 1;
+
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 
 // LED animation state
@@ -99,6 +107,7 @@ void smoothColorTransition(void);
 bool getLocalDateTime(tm &localDateTime);
 bool shouldRunLedAnimation(const tm &localDateTime);
 void turnOffAllLeds();
+void setBeaconLeds(bool on);
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -135,6 +144,13 @@ void setup() {
   digitalWrite(LED_PIN_SINGLE, LOW); 
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);    // Turn built-in LED off
+
+  // Configure PWM for beacon LEDs to keep them at around 30% brightness.
+  ledcSetup(LED_PWM_CHANNEL_SINGLE, LED_PWM_FREQ, LED_PWM_RESOLUTION_BITS);
+  ledcAttachPin(LED_PIN_SINGLE, LED_PWM_CHANNEL_SINGLE);
+  ledcSetup(LED_PWM_CHANNEL_BUILTIN, LED_PWM_FREQ, LED_PWM_RESOLUTION_BITS);
+  ledcAttachPin(LED_BUILTIN, LED_PWM_CHANNEL_BUILTIN);
+  setBeaconLeds(false);
 
   // Create tasks on both cores
   xTaskCreatePinnedToCore(taskDisplay, "Display Task", 4096, NULL, 1, &displayTaskHandle, 1); // Core 1
@@ -269,8 +285,7 @@ void taskLedAnimation(void *parameter) {
     switch (blinkStep) {
       case 0:  // First blink
           ledState = HIGH;  // Turn LED on
-          digitalWrite(LED_PIN_SINGLE, ledState);
-          digitalWrite(LED_BUILTIN, !ledState);
+          setBeaconLeds(ledState == HIGH);
         if (currentMillis - previousMillis >= shortBlinkInterval) {
           previousMillis = currentMillis;
           blinkStep = 1;
@@ -279,8 +294,7 @@ void taskLedAnimation(void *parameter) {
       
         case 1:  // Short off after first blink
           ledState = LOW;  // Turn LED off
-          digitalWrite(LED_PIN_SINGLE, ledState);
-          digitalWrite(LED_BUILTIN, !ledState);
+          setBeaconLeds(ledState == HIGH);
         if (currentMillis - previousMillis >= shortBlinkInterval) {
           previousMillis = currentMillis;
           blinkStep = 2;
@@ -289,8 +303,7 @@ void taskLedAnimation(void *parameter) {
 
         case 2:  // Second blink
           ledState = HIGH;  // Turn LED on
-          digitalWrite(LED_PIN_SINGLE, ledState);
-          digitalWrite(LED_BUILTIN, !ledState);
+          setBeaconLeds(ledState == HIGH);
         if (currentMillis - previousMillis >= shortBlinkInterval) {
           previousMillis = currentMillis;
           blinkStep = 3;
@@ -299,8 +312,7 @@ void taskLedAnimation(void *parameter) {
 
       case 3:  // Long pause after two blinks
           ledState = LOW;  // Turn LED off
-          digitalWrite(LED_PIN_SINGLE, ledState);
-          digitalWrite(LED_BUILTIN, !ledState);
+          setBeaconLeds(ledState == HIGH);
         if (currentMillis - previousMillis >= longPauseInterval) {
           previousMillis = currentMillis;
           blinkStep = 0;  // Reset cycle
@@ -351,13 +363,25 @@ bool shouldRunLedAnimation(const tm &localDateTime) {
   return localDateTime.tm_hour >= LED_ACTIVE_HOUR_START && localDateTime.tm_hour < LED_ACTIVE_HOUR_END;
 }
 
+void setBeaconLeds(bool on) {
+  const int onDutySingle = (LED_PWM_MAX_DUTY * LED_BRIGHTNESS_PERCENT) / 100;
+  const int offDutySingle = 0;
+
+  // Keep original behavior: built-in LED blinks opposite to the single LED.
+  const bool builtInOn = !on;
+  const int onDutyBuiltin = (LED_PWM_MAX_DUTY * LED_BRIGHTNESS_PERCENT) / 100;
+  const int offDutyBuiltin = 0;
+
+  ledcWrite(LED_PWM_CHANNEL_SINGLE, on ? onDutySingle : offDutySingle);
+  ledcWrite(LED_PWM_CHANNEL_BUILTIN, builtInOn ? onDutyBuiltin : offDutyBuiltin);
+}
+
 void turnOffAllLeds() {
   for (int i = 0; i < LED_COUNT; i++) {
     strip.setPixelColor(i, 0, 0, 0);
   }
   strip.show();
-  digitalWrite(LED_PIN_SINGLE, LOW);
-  digitalWrite(LED_BUILTIN, LOW);
+  setBeaconLeds(false);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
