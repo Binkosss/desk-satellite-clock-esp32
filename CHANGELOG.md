@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.0.4] - 2026-04-11
+### Fixed
+- Quiet mode now correctly turns OFF the built-in LED together with the single beacon LED.
+- `turnOffAllLeds()` now directly forces both beacon PWM channels to 0, preventing inverse blink logic from keeping the built-in LED ON during quiet hours.
+
+### Changed
+- `README.md` updated to document that quiet hours force both beacon LEDs OFF.
+
 ## [1.0.3] - 2026-03-20
 ### Added
 - Configurable LED activity window in `src/main.cpp` via:

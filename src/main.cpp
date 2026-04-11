@@ -11,6 +11,7 @@
            the last digit is intentionally unused because 8 digits are enough to display time, date, or temperature/humidity.
 */
 
+// Include necessary libraries
 #include <DHT.h>
 #include <Adafruit_Sensor.h>
 #include <WiFi.h>
@@ -21,6 +22,7 @@
 #include <Adafruit_NeoPixel.h>
 #include <time.h>
 
+// Include secrets if available (for Wi-Fi credentials and timezone)
 #if __has_include("secrets.h")
 #include "secrets.h"
 #endif
@@ -37,12 +39,13 @@
 #define TIMEZONE_POSIX "UTC0"
 #endif
 
-// NeoPixel settings
+// LED settings
 #define LED_PIN 5
 #define LED_COUNT 2
 #define LED_PIN_SINGLE 18 // Single LED pin
+//led built-in pin is defined by LED_BUILTIN constant, typically GPIO 2 on ESP32
 #define DISPLAY_DIGITS_USED 8 // 9-digit module in hardware, last digit intentionally unused
-#define LED_ACTIVE_HOUR_START 7
+#define LED_ACTIVE_HOUR_START 7 // LEDs are on from 07:00 to 20:59
 #define LED_ACTIVE_HOUR_END 21 // LEDs are off from 21:00 to 06:59
 #define LED_BRIGHTNESS_PERCENT 30
 
@@ -381,7 +384,9 @@ void turnOffAllLeds() {
     strip.setPixelColor(i, 0, 0, 0);
   }
   strip.show();
-  setBeaconLeds(false);
+  // Quiet period must force both beacon LEDs off (no inverse blink behavior).
+  ledcWrite(LED_PWM_CHANNEL_SINGLE, 0);
+  ledcWrite(LED_PWM_CHANNEL_BUILTIN, 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
